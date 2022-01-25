@@ -7,14 +7,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
-public class TopKCategoriesReducer extends Reducer<Text, NullWritable, Text, IntWritable> {
+public class TopKCategoriesReducer extends Reducer<Text, Text, Text, NullWritable> {
 
     @Override
-    protected void reduce(Text key, Iterable<NullWritable> values, Reducer<Text, NullWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<Text> values, Reducer<Text, Text, Text, NullWritable>.Context context) throws IOException, InterruptedException {
         int categoryCount = 0;
-        for (NullWritable v: values) {
-            categoryCount++;
+        for (Text v: values) {
+            context.write(v, null);
         }
-        context.write(key, new IntWritable(categoryCount));
     }
 }
