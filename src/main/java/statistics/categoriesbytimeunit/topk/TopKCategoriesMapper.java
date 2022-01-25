@@ -8,21 +8,20 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TopKCategoriesMapper extends Mapper<Text, Text, Text, LongWritable> {
+public class TopKCategoriesMapper extends Mapper<Text, Text, Text, Text> {
 
     private TreeMap<Long, String> treeMap;
 
     @Override
-    protected void setup(Mapper<Text, Text, Text, LongWritable>.Context context) throws IOException, InterruptedException {
+    protected void setup(Mapper<Text, Text, Text, Text>.Context context) {
         treeMap = new TreeMap<>();
     }
 
     @Override
-    protected void map(Text key, Text value, Mapper<Text, Text, Text, LongWritable>.Context context) throws IOException, InterruptedException {
+    protected void map(Text key, Text value, Mapper<Text, Text, Text, Text>.Context context) {
 
         // (assault 37)
-        // arson 24
-        // Read from statistics.categorycount job
+        // Read from statistics.featurecount job
         String category = value.toString().split(" ")[0];
         Long count = Long.valueOf(value.toString().split(" ")[1]);
         treeMap.put(count, category);
@@ -31,13 +30,13 @@ public class TopKCategoriesMapper extends Mapper<Text, Text, Text, LongWritable>
     }
 
     @Override
-    protected void cleanup(Mapper<Text, Text, Text, LongWritable>.Context context) throws IOException, InterruptedException {
+    protected void cleanup(Mapper<Text, Text, Text, Text>.Context context) throws IOException, InterruptedException {
         for (Map.Entry<Long, String> entry : treeMap.entrySet()) {
 
-            long count = entry.getKey();
+            Long count = entry.getKey();
             String name = entry.getValue();
 
-            context.write(new Text(name), new LongWritable(count));
+            context.write(new Text(""), new Text(name + "," + count.toString()));
         }
     }
 }
