@@ -11,7 +11,6 @@ public class TopKCategoriesReducer extends Reducer<Text, Text, Text, NullWritabl
 
     @Override
     protected void reduce(Text key, Iterable<Text> values, Reducer<Text, Text, Text, NullWritable>.Context context) throws IOException, InterruptedException {
-        int categoryCount = 0;
         for (Text v: values) {
             context.write(v, null);
         }

@@ -21,7 +21,7 @@ public class FeatureCountJob {
 
     public static void main(String[] args) {
         Configuration conf = new Configuration();
-        conf.set("feature_index", DISTRICT_COLUMN_INDEX);
+        conf.set("feature_index", CATEGORY_COLUMN_INDEX);
         try {
             Job j = Job.getInstance(conf, "Feature counting");
             j.setJarByClass(FeatureCountJob.class);

@@ -15,6 +15,6 @@ public class FeatureCountReducer extends Reducer<Text, IntWritable, Text, IntWri
         for (IntWritable v: values) {
             categoryCount += v.get();
         }
-        context.write(key, new IntWritable(categoryCount));
+        context.write(new Text(key.toString() + ";"), new IntWritable(categoryCount));
     }
 }
