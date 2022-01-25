@@ -12,10 +12,10 @@ import java.io.IOException;
 
 public class CleaningJob {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Configuration conf = new Configuration();
         try {
-            Job j = Job.getInstance(conf, "Filtering");
+            Job j = Job.getInstance(conf, "Cleaning and feature engineering");
             j.setJarByClass(CleaningJob.class);
 
             j.setMapperClass(CleaningMapper.class);

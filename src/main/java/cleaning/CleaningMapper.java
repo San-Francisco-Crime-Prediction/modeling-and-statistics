@@ -1,5 +1,7 @@
 package cleaning;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -7,16 +9,23 @@ import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 import java.time.Month;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     @Override
+    // Header of the file: Dates, Category, Descript, DayOfWeek, PdDistrict, Resolution, Address, X, Y
     protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, Text>.Context context)
             throws IOException, InterruptedException {
 
-        // Header of the file: Dates, Category, Descript, DayOfWeek, PdDistrict, Resolution, Address, X, Y
-        String[] fields = value.toString().split(",");
+        // Some values have commas but enclosed by quotes, such as "TRESPASSING, VIOLATION"
+        // So we split on the comma only if that comma has zero, or an even number of quotes ahead of it
+        String[] fields =
+                Iterables.toArray(Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")).
+                                split(value.toString()),
+                        String.class);
 
         // If one of the columns is absent the row is invalid
         if (fields.length == 9) {
@@ -35,7 +44,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                 }
 
                 // Stopwords removal from address column
-                newAddress = fields[6].toUpperCase().replace("AV", "").
+                newAddress = fields[6].toUpperCase().replace(" AV", "").
                         replace(" ST", "").
                         replace(" OF", "").
                         replace(" BLOCK", "")
