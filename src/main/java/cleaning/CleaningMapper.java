@@ -34,7 +34,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                 }
 
                 // Stopwords removal from address column
-                newAddress = fields[6].toUpperCase().replace("av", "").
+                newAddress = fields[6].toUpperCase().replace("AV", "").
                         replace(" ST", "").
                         replace(" OF", "").
                         replace(" BLOCK", "")
