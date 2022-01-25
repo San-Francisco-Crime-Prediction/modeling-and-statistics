@@ -1,7 +1,6 @@
 package cleaning;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
@@ -35,7 +34,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                 }
 
                 // Stopwords removal from address column
-                newAddress = fields[6].replace("av", "").
+                newAddress = fields[6].toLowerCase(Locale.ROOT).replace("av", "").
                         replace("st", "").
                         replace("of", "").
                         replace("block", "")
@@ -62,14 +61,14 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
 
             StringBuilder finalRow = new StringBuilder();
             for (int i = 0; i < 6; i++) {
-                finalRow.append(fields[i]);
+                finalRow.append(fields[i]).append(",");
             }
-
-            finalRow.append(newAddress).
-                    append(fields[6]).
-                    append(fields[7]).
-                    append(timeOfDay).
-                    append(month).append(year);
+            finalRow.append(newAddress).append(",").
+                    append(fields[6]).append(",").
+                    append(fields[7]).append(",").
+                    append(timeOfDay).append(",").
+                    append(month).append(",").
+                    append(year);
 
             if (!nullRow) {
                 context.write(new Text(""), new Text(finalRow.toString()));
@@ -77,3 +76,4 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
         }
     }
 }
+
