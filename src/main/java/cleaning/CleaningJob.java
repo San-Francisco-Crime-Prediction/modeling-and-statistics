@@ -23,7 +23,7 @@ public class CleaningJob {
             j.setMapOutputKeyClass(Text.class);
             j.setMapOutputValueClass(Text.class);
 
-            FileInputFormat.addInputPath(j, new Path("input"));
+            FileInputFormat.addInputPath(j, new Path("crimes"));
             FileOutputFormat.setOutputPath(j, new Path("cleandata"));
             j.waitForCompletion(true);
 

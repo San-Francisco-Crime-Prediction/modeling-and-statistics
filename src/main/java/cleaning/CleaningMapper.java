@@ -15,6 +15,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
     protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, Text>.Context context)
             throws IOException, InterruptedException {
 
+        // Header of the file: Dates, Category, Descript, DayOfWeek, PdDistrict, Resolution, Address, X, Y
         String[] fields = value.toString().split(",");
 
         // If one of the columns is absent the row is invalid
@@ -63,6 +64,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
             for (int i = 0; i < 6; i++) {
                 finalRow.append(fields[i]).append(",");
             }
+
             finalRow.append(newAddress).append(",").
                     append(fields[7]).append(",").
                     append(fields[8]).append(",").
@@ -71,7 +73,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                     append(year);
 
             if (!nullRow) {
-                context.write(new Text(""), new Text(finalRow.toString()));
+                context.write(new Text(fields[5]), new Text(finalRow.toString()));
             }
         }
     }
