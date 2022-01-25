@@ -34,11 +34,11 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                 }
 
                 // Stopwords removal from address column
-                newAddress = fields[6].toLowerCase(Locale.ROOT).replace("av", "").
-                        replace("st", "").
-                        replace("of", "").
-                        replace("block", "")
-                        .replace("ln", "");
+                newAddress = fields[6].toUpperCase().replace("av", "").
+                        replace(" ST", "").
+                        replace(" OF", "").
+                        replace(" BLOCK", "")
+                        .replace(" LN", "");
 
                 // Extracting time of day, month, and year from existing features
                 String date = fields[0].split(" ")[0];
@@ -64,8 +64,8 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                 finalRow.append(fields[i]).append(",");
             }
             finalRow.append(newAddress).append(",").
-                    append(fields[6]).append(",").
                     append(fields[7]).append(",").
+                    append(fields[8]).append(",").
                     append(timeOfDay).append(",").
                     append(month).append(",").
                     append(year);
