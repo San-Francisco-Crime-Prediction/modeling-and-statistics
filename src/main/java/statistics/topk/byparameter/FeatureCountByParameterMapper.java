@@ -1,4 +1,4 @@
-package statistics.topk.bytimeunit;
+package statistics.topk.byparameter;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;

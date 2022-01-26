@@ -1,4 +1,4 @@
-package statistics.topk.bytimeunit;
+package statistics.topk.byparameter;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;

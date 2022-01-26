@@ -1,4 +1,4 @@
-package statistics.topk.bytimeunit;
+package statistics.topk.byparameter;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
