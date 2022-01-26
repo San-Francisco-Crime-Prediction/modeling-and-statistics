@@ -1,4 +1,4 @@
-package statistics.topk;
+package statistics.topkcount;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -14,7 +14,7 @@ public class TopKFeatureCountMapper extends Mapper<LongWritable, Text, Text, Int
 
     @Override
     protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, IntWritable>.Context context) throws IOException, InterruptedException {
-        int featureIndex = Integer.parseInt(context.getConfiguration().get("feature_index"));
+        int featureIndex = Integer.parseInt(context.getConfiguration().get("feature_col_index"));
 
         String category = Iterables.toArray(Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")).
                         split(value.toString()),

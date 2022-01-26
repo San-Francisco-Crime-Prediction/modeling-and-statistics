@@ -1,4 +1,4 @@
-package statistics.topk.byparameter;
+package statistics.byparametercount;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;

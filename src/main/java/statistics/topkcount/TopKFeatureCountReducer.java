@@ -1,4 +1,4 @@
-package statistics.topk;
+package statistics.topkcount;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -13,12 +13,12 @@ public class TopKFeatureCountReducer extends Reducer<Text, IntWritable, Text, In
     private TreeMap<Integer, String> treeMap;
 
     @Override
-    protected void setup(Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+    protected void setup(Reducer<Text, IntWritable, Text, IntWritable>.Context context) {
         treeMap = new TreeMap<>();
     }
 
     @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<IntWritable> values, Reducer<Text, IntWritable, Text, IntWritable>.Context context) {
         int categoryCount = 0;
         for (IntWritable v: values) {
             categoryCount += v.get();

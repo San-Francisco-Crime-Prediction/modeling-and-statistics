@@ -1,4 +1,4 @@
-package statistics.topk.byparameter;
+package statistics.byparametercount;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
