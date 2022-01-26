@@ -1,0 +1,5 @@
+.idea
+.DS_Store
+target
+src/main/java/META-INF
+out

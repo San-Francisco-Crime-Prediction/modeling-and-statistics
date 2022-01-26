@@ -1,11 +1,14 @@
 package cleaning;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class CleaningReducer extends Reducer<Text, Text, NullWritable, Text> {
 
@@ -20,7 +23,10 @@ public class CleaningReducer extends Reducer<Text, Text, NullWritable, Text> {
 
         for (Text t : values) {
 
-            String[] fields = t.toString().split(",");
+            String[] fields =
+                    Iterables.toArray(Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")).
+                                    split(t.toString()),
+                            String.class);
             tuples.add(fields);
 
             try {
