@@ -15,11 +15,11 @@ import java.util.regex.Pattern;
 
 public class FeatureCountByParameterMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
-    private ArrayList<String> topKCategories;
+    private ArrayList<String> topKFeatureCounts;
 
     @Override
     protected void setup(Mapper<LongWritable, Text, Text, IntWritable>.Context context) throws IOException {
-        topKCategories = new ArrayList<>();
+        topKFeatureCounts = new ArrayList<>();
         Path pt = new Path(context.getConfiguration().get("top_k_output_path"));
 
         FileSystem fs = FileSystem.get(context.getConfiguration());
@@ -27,7 +27,7 @@ public class FeatureCountByParameterMapper extends Mapper<LongWritable, Text, Te
         String line;
         line = br.readLine();
         while (line != null) {
-            topKCategories.add(line.split(";")[0]);
+            topKFeatureCounts.add(line.split(";")[0]);
             line = br.readLine();
         }
         br.close();
@@ -41,7 +41,7 @@ public class FeatureCountByParameterMapper extends Mapper<LongWritable, Text, Te
                         split(value.toString()),
                 String.class);
 
-        for (String c : topKCategories)
+        for (String c : topKFeatureCounts)
             if (c.equals(tokens[1]))
                 context.write(new Text(tokens[Integer.parseInt(context.getConfiguration().get("feature_col_index"))]
                         + " "

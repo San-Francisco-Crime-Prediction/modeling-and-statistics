@@ -69,8 +69,14 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                         getDisplayName(TextStyle.FULL_STANDALONE, new Locale("en-US"));
             }
 
+            String correctedCategory = fields[1];
+            if (correctedCategory.equals("TREA"))
+                correctedCategory = "TRESPASSING";
+
             StringBuilder finalRow = new StringBuilder();
             for (int i = 0; i < 6; i++) {
+                if (i == 1)
+                    finalRow.append(correctedCategory).append(",");
                 finalRow.append(fields[i]).append(",");
             }
 
