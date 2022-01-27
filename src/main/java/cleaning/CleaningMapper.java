@@ -71,7 +71,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
 
             String correctedCategory = fields[1];
             if (correctedCategory.equals("TREA"))
-                correctedCategory = "TRESPASSING";
+                correctedCategory = "TRESPASS";
 
             StringBuilder finalRow = new StringBuilder();
             for (int i = 0; i < 6; i++) {
