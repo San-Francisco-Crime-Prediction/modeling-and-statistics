@@ -42,7 +42,7 @@ public class FeatureCountByParameterMapper extends Mapper<LongWritable, Text, Te
                 String.class);
 
         for (String c : topKFeatureCounts)
-            if (c.equals(tokens[1]))
+            if (c.equals(tokens[Integer.parseInt(context.getConfiguration().get("feature_col_index"))]))
                 context.write(new Text(tokens[Integer.parseInt(context.getConfiguration().get("feature_col_index"))]
                         + " "
                         + tokens[Integer.parseInt(context.getConfiguration().get("parameter_col_index"))]), new IntWritable(1));
