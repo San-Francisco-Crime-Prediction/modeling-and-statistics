@@ -1,6 +1,6 @@
 # BigData project - A.A. 2021/22
 Team member:
-<br>Agostino Antonino, ---MATRICOLA---
+<br>Agostino Antonino, 223958
 <br>Andronico Giorgio, ---MATRICOLA---
 <br>Gianfranco Sapia, 223954
   
@@ -39,7 +39,7 @@ CREATE TABLE crimes(dates varchar(255), category varchar(255), descript varchar(
 ```
 After this the file located in `/var/lib/mysql-files` has been loaded inside the table crimes as follow:
 ```
-CREATE TABLE crimes(dates varchar(255), category varchar(255), descript varchar(255), dayoftheweek varchar(255), pddistrict varchar(255), resolution varchar(255), address varchar(255), longitude varchar(255), lat varchar(255));
+LOAD DATA INFILE '/var/lib/mysql-files/train.csv' INTO TABLE crimes FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 ```
 The last step that has been performed is due to presence of comma in the fields of *Description* and *Resolution*. These fields have been concatainated within double quotes to in a better way during the MapReduce jobs. The query is the following:
 ```
@@ -72,11 +72,23 @@ The dataset is structured in 878048 rows and 12 columns. The columns are enumera
 
 ***GRAFICI E FEATURE SELECTION***
 ## MapReduce Jobs
-Different MapReduce Jobs has been implemented: a first one that help cleaning the dataset and other two to calculate statistics relative to the dataset.
+Different MapReduce Jobs has been implemented: a first one that helps cleaning the dataset and other two to calculate statistics relative to the dataset.
 ### Cleaning Job
 This job helps to clean up the dataset from noisy data inside the dataset. It first takes the data from the `crimes` folder inside the HDFS the data and output the cleaned result in a new folder `cleandata` on HDFS. The cleaning is perfomed on both Mapper and Reducer of the job.
 
 The mapper at first receive a row from the dataset and it perfoms different operation on some fields of it:
 1. Stop-word removal from address column ("OAK ST / LAGUNA ST" to "OAK / LAGUNA") 
-2. Discretization of the hour after the split of date column (hours in range 5 and 11 become "Morning", in range from 12 to 17 become "Afternoon" and so on...)
-3. 
+2. Discretization of the hour after the split of *Dates* column (hours in range 5 and 11 become "Morning", in range from 12 to 17 become "Afternoon" and so on...)
+3. Correction on the field *Category* ("TREA" is the same of "TRESPASS")
+4. Creation of two new fields *Month* and *Year* after the split of columns *Dates*
+
+Then, this new row is sent to the reducer with as key the discrict and as value the whole row. Some values in the latitude column were in the range of 90 and 93 (latitude of the North Pole), so they have been corrected with a new value representing the median of that discrict.
+
+### Statistic Job
+This MapReduce Job has a twofold use: obtain the top-k occurences of a given column and then know their distribution against another column.
+
+The first job takes as input the output of the cleaning data from the previous MapReduce Job. This job works as a word count: the mapper just write on the context as key the value of the column that we are interested in the top-k occurencies and as key "1", the reducers sum up all these values received as value, keeping track only of the top-k occurrences in a [tree-map](https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html). The output of this job will be in a new folder called "top-k-out".
+
+This second job works as a word count too, but this time the counting is done from some grouped values to know the distribution with respect to another parameter. This job takes as input the output of the previous job. On the mapper, each of them read the file output of the previous job and it writes on the context as key the value of the column of the top-k occurences and the value of the corresponding column choosen from the parameter that has been set and as value "1". The reducer sum up all these values and output the result on a new folder "distribution_out". 
+
+## Modelling
