@@ -23,11 +23,12 @@ public class StatisticsJob {
      * OK 3. Estrarre i top-k crimini più frequenti in assoluto, per plottarne la distribuzione in giorni/mesi
      * OK 4. Estrarre i top-k distretti più criminosi in assoluto, per plottarne la distribuzione in anni
      * OK 5. Quali sono e quante volte occorrono i top-k crimini per ciascun distretto
+     * OK 6. Numero di crimini nei top-k distretti per ciascuna fascia oraria giornaliera
      * ...
      * */
 
-    public static final String FIRST_JOB_OUTPUT_PATH = "hdfs://master:9000/user/hadoopa/top-k_out/part-r-00000";
-    public static final String JOBS_INPUT_PATH = "hdfs://master:9000/user/hadoopa/cleandata";
+    public static final String FIRST_JOB_OUTPUT_PATH = "hdfs://master:9000/user/hadoop/top-k_out/part-r-00000";
+    public static final String JOBS_INPUT_PATH = "hdfs://master:9000/user/hadoop/cleandata";
     public static final String CATEGORY_COLUMN_INDEX = "1";
     public static final String DAYOFWEEK_COLUMN_INDEX = "3";
     public static final String DISTRICT_COLUMN_INDEX = "4";
@@ -42,7 +43,7 @@ public class StatisticsJob {
         // Output of the first job will be in FIRST_JOB_OUTPUT_PATH, to know absolute numbers
         String featureIndex = CATEGORY_COLUMN_INDEX;
         String parameterIndex = DISTRICT_COLUMN_INDEX;
-        String k = "50"; // For first job only
+        String k = "5"; // For first job only
 
         Configuration confFirstJob = new Configuration();
         confFirstJob.set("feature_col_index", featureIndex);

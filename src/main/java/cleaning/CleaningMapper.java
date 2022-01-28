@@ -89,7 +89,7 @@ public class CleaningMapper extends Mapper<LongWritable, Text, Text, Text> {
                     append(year);
 
             if (!nullRow) {
-                context.write(new Text(fields[5]), new Text(finalRow.toString()));
+                context.write(new Text(fields[4]), new Text(finalRow.toString()));
             }
         }
     }
