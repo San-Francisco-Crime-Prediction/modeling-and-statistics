@@ -1,4 +1,4 @@
-# BigData project - A.A. 2021/22
+# Big Data Analytics Exam Project - A.A. 2021/22
 Team members:
 <br>Agostino Antonino, 223958
 <br>Andronico Giorgio, 227815
