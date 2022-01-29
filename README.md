@@ -92,3 +92,9 @@ The first job takes as input the output of the cleaning data from the previous M
 This second job works as a word count too, but this time the counting is done from some grouped values to know the distribution with respect to another parameter. This job takes as input the output of the previous job. On the mapper, each of them read the file output of the previous job and it writes on the context as key the value of the column of the top-k occurences and the value of the corresponding column choosen from the parameter that has been set and as value "1". The reducer sum up all these values and output the result on a new folder "distribution_out". 
 
 ## Modelling
+The modelling part has been perfomed with the use of Spark and Python language with the help of the library SparkMLlib. The script has been done by initially loading the data from the HDFS to a dataframe with RDD format. Then the columns *Description*,*Address* and *Crimedate* has been drop since redudant with other columns. All the remaining columns then have been casted to their corresponding type. All the categorical data has been transformed with `OneHotEncoder`. The column category is the one where the model is going to train. A random forest classifier has been used to train the dataset. The accuracy obtained is about 22%. 
+If we add the description as column in the OneHotEncoder, the model reach an accuracy of 40%. 
+By removing the columns latitude and longitude the accuracy goes up to 44%. 
+Using the same columns, but with the NaiveBayes Classifier the accuracy is of 43%. 
+Starting from these last columns and removing `dayoftheweek` an accuracy of 39.77% on randomforestclassifier. 
+Using Naive Bayes classifier removing crimedate, address, longitude, latitude and dayofweek  99%
