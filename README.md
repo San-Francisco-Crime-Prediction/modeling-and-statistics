@@ -28,6 +28,8 @@ Both slaves are set-up as follows:
 
 The last software set-up only on master is **Apache Spark**, with version *3.2.0*, which is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or clusters.
 
+**Conda** is a toolkit installed on master machine that equips users to work with thousand of open-source packages and libraries. This toolkit helped to create an enviroment with various library installed useful for the Python language.
+
 ## Data ingestion
 During this phase the file `train.csv` has been first uploaded on **MySQL Server** on the master machine. The first step was creating the database with the following query:
 ```
@@ -82,38 +84,38 @@ For each row of the dataset, these operations are performed:
 2. Creation of a categorical column called "TimeOfTheDay", which varies according to the hour in which the crime occurs. i.e., hours in range 5 and 11 become "Morning", in range from 12 to 17 become "Afternoon", etc.
 3. Typo correction on the field *Category* ("TREA" is the same as "TRESPASS", most likely this was due to a typo in the dataset)
 4. Creation of two new fields *Month* and *Year* after the split of column *Date*
+
+
 The mapper writes to the context the district as key and as value the whole row. This is because part of the cleaning process happens in the reducer as well. 
 #### Reducer
-Indeed, some values in the latitude column were in the range of 90 and 93, which are obviously wrong (90 is the latitude of the North Pole). So, for each district, the reducer computer the median values of both latitude and longitude, and in case it finds an outlier, it substitutes that value with the median for that district. So for example, if a "Robbery" crime happened in the "Mission" district at a latitude of 92, and the median for the district is 82, then the new value will have 82 as latitude instead of 92. The output of the reducer is the completely cleaned dataset.
+Indeed, some values in the latitude column were in the range of 90 and 93, which are obviously wrong (90 is the latitude of the North Pole). So, for each district, the reducer computes the mean values of both latitude and longitude, and in case it finds an outlier, it substitutes that value with the mean for that district. So for example, if a "Robbery" crime happened in the "Mission" district at a latitude of 92, and the mean for the district is 82, then the new value will have 82 as latitude instead of 92. The output of the reducer is the completely cleaned dataset.
 
 ## Data analysis
 In this step, we extracted some statistics from the dataset to identify trends, highest values for different columns, etc. This was performed by two separate (but chained) jobs.
 
 ### First Job
-Objective: obtaining the top-k obtain the top-k occurences of a given column.
+Objective: obtaining the top-k occurences of a given column.
 
-The first job takes as input the output of the cleaning data from the previous MapReduce Job. This job works as a word count: the mapper just writes on the context the value of the column as key, and 1 as value, the reducers sum up all these values received as value, keeping track only of the top-k occurrences in a [TreeMap](https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html). The output of this job (of the form "column occurrence, number of occurrences") will be in a new folder called "top-k-out".
+The first job takes as input the cleaned data from the previous MapReduce Job. This job works as a word count: the mapper just writes on the context the value of the column as key, and 1 as value, the reducers sum up all these values received as value, keeping track only of the top-k occurrences in a [TreeMap](https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html). The output of this job (of the form "column occurrence, number of occurrences") will be in a new folder called "top-k_out".
 
 ### Second job
 This job is chained to the first, and its objective is to know the distribution of one column w.r.t. another column. For example, one might be interested in knowing how the rate of each crimes (or, in our case, of the top-k crimes) increases or decreases year-by-year.
+Note that the jobs are completely parametric. They can be used to plot the distribution of any column against any other column (district by year, crimes by address, etc.), just by modifying the ```featureIndex``` and ```parameterIndex``` in ```StatisticsJob.java```. Also, the k is a parameter, so the jobs allow to compute statistics for any given k. 
+
 #### Mapper
 Firstly, the mapper reads the output of the first job, as it needs to know which are the top-k occurring values for a given column. Continuing from the last example, it needs to know which are the top-k occurring crimes, to know their distribution against time.
 Then, as a second input, it reads again the cleaned dataset, and considers only the rows where one of the top-k occurring values appears.
-Concluding the example, the mapper will ultimately output all pairs with ("type of crime", "year in which it happened") as key and 1 as value.
+Concluding the example, the mapper will ultimately output all pairs with ("type of crime", "year in which it happened") as **key** and 1 as **value**.
 
 #### Reducer
 The reducer simply aggregates by both columns and sums up the occurrences, similarly to what a word count would do. Following again from the previous example, the output will be of the form ("type of crime", "year in which it happened", "how many times it occurred").
-
-This job reads both from the output of the first job, and again from the cleaned dataset. This is because 
-     
-This second job works as a word count too, but this time the counting is done from some grouped values to know the distribution with respect to another parameter. This job takes as input the output of the previous job. On the mapper, each of them read the file output of the previous job and it writes on the context as key the value of the column of the top-k occurences and the value of the corresponding column choosen from the parameter that has been set and as value "1". The reducer sum up all these values and output the result on a new folder "distribution_out". 
 
 ### Validation of the output
 To debug and verify correctness of these jobs, for each of the analyses we have performed hive queries and compared results. These are reported below.
 
 ### Analyses performed
 
-To plot the results we have used the plotly library for Python, which provides **interactive plots** that allow to filter information on-the-fly **just by hovering and/or clicking the mouse cursor**. These can be viewed by running the Jupyter notebook provided in the repo using the instructions provided above.
+To plot the results we have used the *plotly** library for Python, which provides **interactive plots** that allow to filter information on-the-fly **just by hovering and/or clicking the mouse cursor**. These can be viewed by running the Jupyter notebook provided in the repo using the instructions provided below.
 
 #### How many times each crime occurs
 We can see that larceny/theft is the top category, immediately followed by other offences. All the other categories do not reach >100k occurrences, so the first two categories are dominant by quite a large margin.
@@ -146,29 +148,47 @@ Hive query: ``` SELECT COUNT(*), c.district , c.`year` FROM crimes c GROUP BY c.
 ![Alt text](plots/district_by_year.png?raw=true "Title")
 
 
-## Modelling
-The modelling part has been perfomed with the use of Spark and Python language with the help of the library SparkMLlib. The script has been done by initially loading the data from the HDFS to a dataframe with RDD format. Two different model has been used for the prediction task: Random Forest Classifier and Naive Bayes Classifier. The dataset needs to be prepared before their use for the model, so some previous step perfomed this operations:
-- Removal of column *Address*, since redundant because of the presence of similar columns such as *Timeoftheday*, *Month* and *Year*
-- Convertion of data type to their properly ones, i.e., *Longitude* and *Latitude* on float.
-- Indexing of column *Category* since the modelling wants to have a prediction on this.
+## Modeling
 
-Different configuration has been applied to the models trying to achieve an high percentage of accuracy. All the different configuration before being trained has been transformed using the function OneHotEncoder. Then one last step was to split the dataset into a train set (70% of the dataset) and a test set (30% of the dataset).
+### Steps needed to run the model
+- Download this script at [link](https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh) on the master machine;
+- Execute `sh Miniconda3-py38_4.10.3-Linux-x86_64.sh`;
+- Follow the instructions that appears on the screen;
+- After the setup is finished, execute the command `conda create -y -n pyspark_env -c conda-forge pyarrow pandas conda-pack`
+  - note that you must run this command while being in the base conda environment
+- Then execute `conda activate pyspark_env`
+- Export the environment in an archive with `conda pack -f -o pyspark_env.tar.gz` (in the same directory where is placed the Jupyter Notebook);
+- After that, install Jupyter, Seaborn, Plotly, PySpark with the command:
+  - `conda install jupyter, plotly, pyspark, seaborn`
+- Start Jupyter Notebook
+- Open the notebook 'Data Analytics and Modeling.ipynb'
+
+The modelling part has been perfomed on a [Jupyter Notebook](https://jupyter.org/) using Spark on the cluster, Python language and SparkMLlib library. Initially the dataset is loaded from an **external** Hive table to a dataframe. Different models has been used for the prediction task: **Random Forest Classifier**, **Naive Bayes Classifier** and **Multinomial Logistic Regression**. The dataset needs to be prepared before its use for the model, so these operations were performed:
+- Removal of column *Crimedate*, since redundant because of the presence of similar columns such as *Timeoftheday*, *Month* and *Year*;
+- Convertion of data type to their properly ones, i.e., *Longitude* and *Latitude* on float;
+- Indexing of column *Category* to convert from a string format to a proper one for the prediction task.
+
+Different configurations have been applied to the models trying to achieve an high percentage of accuracy. All of the different categorical columns, before being trained, have been transformed using the function OneHotEncoder. Then one last step was to split the dataset into a train set (70% of the dataset) and a test set (30% of the dataset).
 ### Random Forest Classifier
-Starting from the previous preparation of the dataset the model has been trained considering or removing other columns. The following has been perfomed:
-- Removal of *Description* and *Address* columns: 20% of accuracy achieved;
+Starting from the previous preparation of the dataset the model has been trained several times with different feature sets. The following has been perfomed (accuracy refers to test accuracy, train accuracy is in the Jupyter notebook):
+- Removal of *Description* and *Address* columns: 22% of accuracy achieved;
 - Removal of *Address* columns: 40% of accuracy;
-- Removal of *Latitude* and *Longitude* columns: 44% of accuracy;
+- Removal of *Latitude*, *Longitude*, *Address* columns: 44% of accuracy;
 - Removal of *Latitude*, *Longitude* and *Dayoftheweek* columns: 39.77% of accuracy.
 
 ### Naive Bayes Classifier
 The Naive Bayes Classifier has been perfomed with the following configuration:
-- Removal of *Address*, *Longitude* and *Latitude* columns: 43% of accuracy;
-- Removal of  *Address*, *Longitude*, *Latitude* and *Dayoftheweek* columns: 99% of accuracy achieved.
+- Removal of *Address*, *Longitude*, *Latitude*, *Description* columns: 22% of accuracy;
+- Removal of *Address*, *Longitude*, *Latitude*  columns: 99.5% of accuracy achieved.
 
+### Multinomial Logistic Regression
+This model has been used with following configuration:
+- Removal of *Address*, *Latitude*, *Longitude* columns: 99.9% of accuracy;
 
-Then the columns *Description*,*Address* and *Crimedate* has been drop since redudant with other columns. All the remaining columns then have been casted to their corresponding type. All the categorical data has been transformed with `OneHotEncoder`. The column category is the one where the model is going to train. A random forest classifier has been used to train the dataset. The accuracy obtained is about 22%. 
-If we add the description as column in the OneHotEncoder, the model reach an accuracy of 40%. 
-By removing the columns latitude and longitude the accuracy goes up to 44%. 
-Using the same columns, but with the NaiveBayes Classifier the accuracy is of 43%. 
-Starting from these last columns and removing `dayoftheweek` an accuracy of 39.77% on randomforestclassifier. 
-Using Naive Bayes classifier removing crimedate, address, longitude, latitude and dayofweek  99%
+### Confusion Matrix
+The Multinomial Logistic Regression has given the best result as accuracy metrics. Starting by this point a confusion matrix has been constructed with as row the *Category* and as column the predicted values. The figure below is a representation of the confusion matrix that has been described.
+
+![Confusion Matrix!](/plots/confusion_matrix.png "Confusion Matrix of predicted values from Multinomial Logistic Regression")
+
+### Final considerations
+The description column proved to be very relevant for a good model, as it is the most valuable piece of information of a crime. Indeed, when removing the column in the Naive Bayes model, the test accuracy dropped from 99.5% to 22%. Also, when doing so in the Random Forest classifier, accuracy dropped from 40% to 22%. 
