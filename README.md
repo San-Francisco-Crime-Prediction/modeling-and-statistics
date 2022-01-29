@@ -126,8 +126,8 @@ Hive query: ``` SELECT COUNT(*), c.district FROM crimes c GROUP BY c.district OR
 ![Alt text](plots/total_districts.png?raw=true "Title")
 
 #### Extract the top-5 occurring crimes, and plot their distribution by day of the week
-Hive query: ``` SELECT COUNT(*), c.category, c.dayoftheweek FROM crimes c GROUP BY c.category, c.dayoftheweek ORDER BY c.category ASC, c.dayoftheweek ASC; ```
 The distribution is quite uniform, with the highest peak being on friday and the lowest peak being on sunday. No substantial variation during the weekend. 
+Hive query: ``` SELECT COUNT(*), c.category, c.dayoftheweek FROM crimes c GROUP BY c.category, c.dayoftheweek ORDER BY c.category ASC, c.dayoftheweek ASC; ```
 ![Alt text](plots/crimes_by_day.png?raw=true "Title")
 
 #### Extract the top-5 occurring crimes, and plot their distribution by district
@@ -141,8 +141,8 @@ Hive query: ``` SELECT COUNT(*), c.district , c.dayperiod FROM crimes c GROUP BY
 ![Alt text](plots/crimes_by_day.png?raw=true "Title")
 
 #### Extract the top-4 most criminal districts, and plot their crime rate by year
-Hive query: ``` SELECT COUNT(*), c.district , c.`year` FROM crimes c GROUP BY c.district , c.`year` ORDER BY c.district ASC, c.`year` ASC; ```
 We see quite a uniform distribution on each of the districts, and a decrease in crime rate towards 2015. Bayview is the most uniformly distributed, and Southern has seen a 2-3k increase between 2010 and 2014. Northern is the lowest of the four in terms of occurrences.
+Hive query: ``` SELECT COUNT(*), c.district , c.`year` FROM crimes c GROUP BY c.district , c.`year` ORDER BY c.district ASC, c.`year` ASC; ```
 ![Alt text](plots/district_by_year.png?raw=true "Title")
 
 
