@@ -1,5 +1,5 @@
 # BigData project - A.A. 2021/22
-Team member:
+Team members:
 <br>Agostino Antonino, 223958
 <br>Andronico Giorgio, 227815
 <br>Gianfranco Sapia, 223954
@@ -101,14 +101,6 @@ Firstly, the mapper reads the output of the first job, as it needs to know which
 Then, as a second input, it reads again the cleaned dataset, and considers only the rows where one of the top-k occurring values appears.
 Concluding the example, the mapper will ultimately output all pairs with ("type of crime", "year in which it happened") as key and 1 as value.
 
-We have performed the following analyses:
-
-1. How many times each crime occurs
-2. How many times a crime is registered in each district
-3. Extract the top-5 occurring crimes, and plot their distribution by day and month 
-4. Extract the top-4 occurring district, and plot their crime rate year-by-year
-5. For each district, extract the top-4 crimes for each district and their relative occurrences
-
 #### Reducer
 The reducer simply aggregates by both columns and sums up the occurrences, similarly to what a word count would do. Following again from the previous example, the output will be of the form ("type of crime", "year in which it happened", "how many times it occurred").
 
@@ -118,6 +110,35 @@ This second job works as a word count too, but this time the counting is done fr
 
 ### Validation of the output
 To debug and verify correctness of these jobs, for each of the analyses we have performed hive queries and compared results.
+
+### Analyses performed
+
+To plot the results we have used the plotly library for Python, which provides **interactive plots** that allow to filter information on-the-fly **just by hovering and/or clicking the mouse cursor**. These can be viewed by running the Jupyter notebook provided in the repo using the instructions provided above.
+
+#### How many times each crime occurs
+We can see that larceny/theft is the top category, immediately followed by other offences. All the other categories do not reach >100k occurrences, so the first two categories are dominant by quite a large margin.
+![Alt text](plots/total_crimes.png?raw=true "Title")
+
+#### How many times a crime is registered in each district
+The distribution here is slightly less "spiked", that is, there is no single district that trumps all the other ones in terms of occurrences. The middle five districts (Ingleside, Tenderloin, Central, Bayview, Northern) belong to the 80k-100k range and the highest ranking is Southern.
+![Alt text](plots/total_districts.png?raw=true "Title")
+
+#### Extract the top-5 occurring crimes, and plot their distribution by day of the week
+The distribution is quite uniform, with the highest peak being on friday and the lowest peak being on sunday. No substantial variation during the weekend. 
+![Alt text](plots/crimes_by_day.png?raw=true "Title")
+
+#### Extract the top-5 occurring crimes, and plot their distribution by district
+Southern is still confirmed to be the most criminal district, and theft the most frequent category.
+![Alt text](plots/crimes_by_district.png?raw=true "Title")
+
+#### Extract the top-5 most criminal districts, and plot their crime rate by time of the day
+This plot just confirms the above statistics. 
+![Alt text](plots/crimes_by_day.png?raw=true "Title")
+
+#### Extract the top-4 most criminal districts, and plot their crime rate by year
+We see quite a uniform distribution on each of the districts, and a decrease in crime rate towards 2015. Bayview is the most uniformly distributed, and Southern has seen a 2-3k increase between 2010 and 2014. Northern is the lowest of the four in terms of occurrences.
+![Alt text](plots/district_by_year.png?raw=true "Title")
+
 
 ## Modelling
 The modelling part has been perfomed with the use of Spark and Python language with the help of the library SparkMLlib. The script has been done by initially loading the data from the HDFS to a dataframe with RDD format. Two different model has been used for the prediction task: Random Forest Classifier and Naive Bayes Classifier. The dataset needs to be prepared before their use for the model, so some previous step perfomed this operations:
