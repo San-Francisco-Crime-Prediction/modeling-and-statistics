@@ -109,7 +109,7 @@ This job reads both from the output of the first job, and again from the cleaned
 This second job works as a word count too, but this time the counting is done from some grouped values to know the distribution with respect to another parameter. This job takes as input the output of the previous job. On the mapper, each of them read the file output of the previous job and it writes on the context as key the value of the column of the top-k occurences and the value of the corresponding column choosen from the parameter that has been set and as value "1". The reducer sum up all these values and output the result on a new folder "distribution_out". 
 
 ### Validation of the output
-To debug and verify correctness of these jobs, for each of the analyses we have performed hive queries and compared results.
+To debug and verify correctness of these jobs, for each of the analyses we have performed hive queries and compared results. These are reported below.
 
 ### Analyses performed
 
@@ -117,25 +117,31 @@ To plot the results we have used the plotly library for Python, which provides *
 
 #### How many times each crime occurs
 We can see that larceny/theft is the top category, immediately followed by other offences. All the other categories do not reach >100k occurrences, so the first two categories are dominant by quite a large margin.
+Hive query: ``` SELECT COUNT(*), c.category FROM crimes c GROUP BY c.category ORDER BY COUNT(*) DESC; ```
 ![Alt text](plots/total_crimes.png?raw=true "Title")
 
 #### How many times a crime is registered in each district
 The distribution here is slightly less "spiked", that is, there is no single district that trumps all the other ones in terms of occurrences. The middle five districts (Ingleside, Tenderloin, Central, Bayview, Northern) belong to the 80k-100k range and the highest ranking is Southern.
+Hive query: ``` SELECT COUNT(*), c.district FROM crimes c GROUP BY c.district ORDER BY COUNT(*) DESC; ```
 ![Alt text](plots/total_districts.png?raw=true "Title")
 
 #### Extract the top-5 occurring crimes, and plot their distribution by day of the week
+Hive query: ``` SELECT COUNT(*), c.category, c.dayoftheweek FROM crimes c GROUP BY c.category, c.dayoftheweek ORDER BY c.category ASC, c.dayoftheweek ASC; ```
 The distribution is quite uniform, with the highest peak being on friday and the lowest peak being on sunday. No substantial variation during the weekend. 
 ![Alt text](plots/crimes_by_day.png?raw=true "Title")
 
 #### Extract the top-5 occurring crimes, and plot their distribution by district
 Southern is still confirmed to be the most criminal district, and theft the most frequent category.
+Hive query: ``` SELECT COUNT(*), c.category, c.district FROM crimes c GROUP BY c.category, c.district ORDER BY c.category ASC, c.district ASC; ```
 ![Alt text](plots/crimes_by_district.png?raw=true "Title")
 
 #### Extract the top-5 most criminal districts, and plot their crime rate by time of the day
 This plot just confirms the above statistics. 
+Hive query: ``` SELECT COUNT(*), c.district , c.dayperiod FROM crimes c GROUP BY c.district , c.dayperiod ORDER BY c.district ASC, c.dayperiod ASC; ```
 ![Alt text](plots/crimes_by_day.png?raw=true "Title")
 
 #### Extract the top-4 most criminal districts, and plot their crime rate by year
+Hive query: ``` SELECT COUNT(*), c.district , c.`year` FROM crimes c GROUP BY c.district , c.`year` ORDER BY c.district ASC, c.`year` ASC; ```
 We see quite a uniform distribution on each of the districts, and a decrease in crime rate towards 2015. Bayview is the most uniformly distributed, and Southern has seen a 2-3k increase between 2010 and 2014. Northern is the lowest of the four in terms of occurrences.
 ![Alt text](plots/district_by_year.png?raw=true "Title")
 
